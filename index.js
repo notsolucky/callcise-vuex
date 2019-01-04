@@ -18,6 +18,17 @@ const namespacedVuexInvokers = (optionalNamespace = Optional.None()) => {
       return getter(...evaluate(this, parameters).concat(additionalParameters));
     };
   }
+  
+  // Returns a function that retrieves a state property identified by its name.
+  function vuexState(propertyName) {
+    return function retrieve() {
+      return optionalNamespace
+      .map(namespace => this.$store[namespace])
+      .recover(() => this.$store)
+      .property(propertyName)
+      .get();
+    };
+  }
 
   // Returns a function that calls a VueX getter identified by its name.
   function vuexGetter(getterName) {
@@ -50,6 +61,7 @@ const namespacedVuexInvokers = (optionalNamespace = Optional.None()) => {
 
   return {
     query:    vuexQuery,
+    state:    vuexState,
     getter:   vuexGetter,
     action:   vuexAction,
     mutation: vuexMutation
@@ -69,6 +81,7 @@ module.exports = {
   namespaced: pipe(Optional.Some, namespacedVuexInvokers),
 
   vuexMutation: globalVuex.mutation,
+  vuexState:    globalVuex.state,
   vuexGetter:   globalVuex.getter,
   vuexAction:   globalVuex.action,
   vuexQuery:    globalVuex.query
